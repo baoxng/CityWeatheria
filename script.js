@@ -6,7 +6,7 @@ var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&a
 var searchBtn= $(".searchBtn");
 var currentDate= $(".current-date");
 var weatherIcon= $(".weather-icon");
-var localStorage= $(".local-storage");
+var saveStorage= $(".save-storage");
 var temps= $(".temperature");
 var windSpeed= $(".windSpeed");
 var uvIndex= $(".uvIndex");
@@ -18,8 +18,26 @@ let dd = String(today.getDate()).padStart(2,"0");
 let mm = String(today.getMonth() + 1).padStart(2, '0');
 let yyyy = today.getFullYear();
 var today = mm + '/' + dd + '/' + yyyy;
-document.write(today);
+
 //put the search history into local storage
+if(JSON.parse(localStorage.getItem("saveStorage")) == null){
+ console.log("localStorage not found")
+}
+else{
+    console.log("localStorage loaded into storageArr");
+    getSaveStorage();
+}
+
+//Get the local storage data, goes through for loop and adds new city to list with class of savedEntry this gets emptied.
+function getsaveStorage(){
+    saveStorage.empty();
+    let storageArr=JSON.parse(localStorage.getItem("saveStorage"));
+    for (let i= 0; i < storageArr.length; i++){
+        let newCityItem=$("<li>").attr("class", "savedEntry");
+        newCityItem.text(storageArr[i]);
+        saveStorage.prepend(newCityItem);
+    }
+}
 
 
 //click button event
