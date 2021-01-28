@@ -13,8 +13,12 @@ var uvIndex= $(".uvIndex");
 var cardRow= $(".card-row");
 
 //make a current date
-
-
+var today= new Date();
+let dd = String(today.getDate()).padStart(2,"0");
+let mm = String(today.getMonth() + 1).padStart(2, '0');
+let yyyy = today.getFullYear();
+var today = mm + '/' + dd + '/' + yyyy;
+document.write(today);
 //put the search history into local storage
 
 
