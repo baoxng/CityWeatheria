@@ -1,8 +1,6 @@
-
-var city= $("#city-input");
-var queryURL = "https://api.openweathermap.org/data/2.5/forecast?q=" + city + "&appid=d389e89705c7dbbceb75857a1482546f";
-
 // selected element variables
+var apiKey= "d389e89705c7dbbceb75857a1482546f";
+var cityInput= $("#city-input");
 var nameCity= $(".city-name")
 var searchBtn= $(".searchBtn");
 var currentDate= $(".current-date");
@@ -22,18 +20,18 @@ let yyyy = today.getFullYear();
 var today = mm + '/' + dd + '/' + yyyy;
 
 //put the search history into local storage
-if(JSON.parse(localStorage.getItem("saveStorage")) == null){
- console.log("localStorage not found")
+if(JSON.parse(localStorage.getItem("savedStorage")) == null){
+ console.log("savedStorage not found")
 }
 else{
-    console.log("localStorage loaded into storageArr");
-    getSaveStorage();
+    console.log("savedStorage loaded into storageArr");
+    getsaveStorage();
 }
 
 //Get the local storage data, goes through for loop and adds new city to list with class of savedEntry this gets emptied.
 function getsaveStorage(cityName){
     saveStorage.empty();
-    let storageArr=JSON.parse(localStorage.getItem("saveStorage"));
+    let storageArr=JSON.parse(localStorage.getItem("save-storage"));
     for (let i= 0; i < storageArr.length; i++){
         let newCityItem=$("<li>").attr("class", "savedEntry");
         newCityItem.text(storageArr[i]);
@@ -45,12 +43,17 @@ function getsaveStorage(cityName){
 //click button event
 searchBtn.on("click", function(s){
     s.preventDefault();
-    if (city.val() === "") {
+    if (cityInput.val() === "") {
         alert("You must enter a City");
         return;
     }
     console.log("clicked button")
-    getWeather(city.val());
+    getWeather(cityInput.val());
+});
+$(document).on("click", ".storageEntry", function(){
+    console.log("clicked saved storage entry")
+    let thisElement =$(this);
+    getWeather(thisElement.text());
 });
 
 //function to pull weather data
@@ -65,11 +68,10 @@ function pullWeather(cityName, cityTemp,cityHumidity, cityWindSpeed, cityWeather
 }
 
 //get weather data
-function getWeather (cityInput){
-    let queryURL = `https://api.openweathermap.org/data/2.5/weather?q=${desiredCity}&APPID=${apiKey}&units=imperial`;
-}
+function getWeather (desiredCity){
+    let queryURL = `api.openweathermap.org/data/2.5/forecast?q=${desiredCity}&appid=${apiKey}`;
 $.ajax({
-    url:queryURL,
+    url: queryURL,
     method:"GET"
 })
 .then(function(weatherData){
@@ -80,17 +82,17 @@ $.ajax({
         cityUVIndex: weatherData.coord,
         cityWeatherIconName: weatherData.weather[0].icon
     }
-    let queryURL= `https://api.openweathermap.org/data/2.5/uvi?lat=${cityObj.cityUVIndex.lat}&lon=${cityObj.cityUVIndex.lon}&APPID=${apiKey}&units=imperial`
+    let queryURL= `https://api.openweathermap.org/data/2.5/uvi?lat=${cityObj.cityUVIndex.lat}&lon=${cityObj.cityUVIndex.lon}&appid=${apiKey}`
 $.ajax({
     url:queryURL,
     method:"GET"
 })
 .then(function(uvData){
-    if(JSON.parse(localStorage.getItem("saveStorage")) == null){
+    if(JSON.parse(localStorage.getItem("save-storage")) == null){
         let saveStorageArr= [];
         if (saveStorageArr.indexOf(cityObj.cityName) === -1){
             saveStorageArr.push(cityObj.cityName);
-            localStorage.setItem("saveStorage", JSON.stringify(saveStorageArr));
+            localStorage.setItem("save-storage", JSON.stringify(saveStorageArr));
             let generatedWeatherIcon = `https:///openweathermap.org/img/w/${cityObj.cityWeatherIconName}.png`;
             weatherData(cityObj.cityName, cityObj.cityTemp, cityObj.cityHumidity, cityObj.cityWindSpeed, generatedWeatherIcon, uvData.vaule);
             weatherData(cityObj.cityName);
@@ -101,33 +103,67 @@ $.ajax({
             weatherData(cityObj.cityName, cityObj.cityTemp, cityObj.cityHumidity, cityObj.cityWindSpeed, generatedWeatherIcon, uvData.value);
         }}
         else {
-            let saveStorageArr =JSON.parse(localStorage.getItem("saveStorage"));
+            let saveStorageArr =JSON.parse(localStorage.getItem("save-storage"));
             if (saveStorageArr.indexOf(cityObj.cityName) === -1){
                 saveStorageArr.push(cityObj.cityName);
-                localStorage.setItem("saveStorage", JSON.stringify(saveStorageArr));
+                localStorage.setItem("save-storage", JSON.stringify(saveStorageArr));
                 let generatedWeatherIcon= `https:///openweathermap.org/img/w/${cityObj.cityWeatherIconName}.png`;
                 weatherData(cityObj.cityName, cityObj.cityTemp, cityObj.cityHumidity, cityObj.cityWindSpeed, generatedWeatherIcon, uvData.value);
                 getsaveStorage(cityObj.cityName);
             }
             else{
-                console.log("City already in saveStorage. Unable to add to saved list.")
+                console.log("City already in save-storage. Unable to add to saved list.")
                 let generatedWeatherIcon= `https:///openweathermap.org/img/w/${cityObj.cityWeatherIconName}.png`;
                 weatherData(cityObj.cityName, cityObj.cityTemp, cityObj.cityHumidity, cityObj.cityWindSpeed,generatedWeatherIcon, uvData.value);
             }
         }
-    }
-})
-})
-
-
-//function for city search
-
+    })
+});
 
 //Get five day forecast
 
+getFiveDayForecast();
+
+function getFiveDayForecast() {
+    cardRow.empty();
+    let queryUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${desiredCity}&appid=${apiKey}`;
+    $.ajax({
+        url: queryUrl,
+        method: "GET"
+    })
+    .then(function(fiveDayReponse) {
+        for (let j = 0; j != fiveDayReponse.list.length; j += 8 ) {
+            let cityObj = {
+                date: fiveDayReponse.list[j].dt_txt,
+                icon: fiveDayReponse.list[j].weather[0].icon,
+                temp: fiveDayReponse.list[j].main.temp,
+                humidity: fiveDayReponse.list[j].main.humidity
+            }
+            let dateStr = cityObj.date;
+            let trimmedDate = dateStr.substring(0, 10); 
+            let weatherIco = `https:///openweathermap.org/img/w/${cityObj.icon}.png`;
+            createForecastCard(trimmedDate, weatherIco, cityObj.temp, cityObj.humidity);
+        }
+    })
+}   
+
+
 
 //creating forecast on page
+function createForecastCard(date, icon, temp, humidity) {
 
+    // HTML elements we will create to later
+    let fiveDayCardEl = $("<div>").attr("class", "five-day-card");
+    let cardDate = $("<h3>").attr("class", "card-text");
+    let cardIcon = $("<img>").attr("class", "weatherIcon");
+    let cardTemp = $("<p>").attr("class", "card-text");
+    let cardHumidity = $("<p>").attr("class", "card-text");
 
-
-
+    cardRow.append(fiveDayCardEl);
+    cardDate.text(date);
+    cardIcon.attr("src", icon);
+    cardTemp.text(`Temp: ${temp} \u00B0`);
+    cardHumidity.text(`Humidity: ${humidity}%`);
+    fiveDayCardEl.append(cardDate, cardIcon, cardTemp, cardHumidity);
+}
+}
