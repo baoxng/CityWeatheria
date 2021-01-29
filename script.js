@@ -1,5 +1,5 @@
 // selected element variables
-var apiKey= "54a0b4ce720cced36a1e7cf890a65dcf";
+var apiKey= "d389e89705c7dbbceb75857a1482546f";
 var cityInput= $("#city-input");
 var cityName= $(".city-name")
 var searchBtn= $(".searchBtn");
@@ -20,7 +20,7 @@ let yyyy = today.getFullYear();
 var today = mm + '/' + dd + '/' + yyyy;
 
 //put the search history into local storage
-if(JSON.parse(localStorage.getItem("savedStorage")) == null){
+if(JSON.parse(localStorage.getItem("save-storage")) == null){
  console.log("savedStorage not found")
 }
 else{
@@ -69,7 +69,7 @@ function pullWeather(cityName, cityTemp,cityHumidity, cityWindSpeed, cityWeather
 
 //get weather data
 function getWeather (desiredCity){
-    let queryURL = `api.openweathermap.org/data/2.5/forecast?q=${desiredCity}&appid=${apiKey}`;
+    let queryURL = `https://api.openweathermap.org/data/2.5/weather?q=${desiredCity}&appid=${apiKey}`;
 $.ajax({
     url: queryURL,
     method:"GET"
@@ -103,7 +103,8 @@ $.ajax({
             let generatedWeatherIcon= `https:///openweathermap.org/img/w/${cityObj.cityWeatherIconName}.png`;
             getWeather(cityObj.cityName, cityObj.cityTemp, cityObj.cityHumidity, cityObj.cityWindSpeed, generatedWeatherIcon, uvData.value);
         }}
-        else {
+
+     else {
             let storageArr =JSON.parse(localStorage.getItem("save-storage"));
             if (storageArr.indexOf(cityObj.cityName) === -1){
                 storageArr.push(cityObj.cityName);
@@ -115,7 +116,7 @@ $.ajax({
             else{
                 console.log("City already in save-storage. Unable to add to saved list.")
                 let generatedWeatherIcon= `https:///openweathermap.org/img/w/${cityObj.cityWeatherIconName}.png`;
-                weatherData(cityObj.cityName, cityObj.cityTemp, cityObj.cityHumidity, cityObj.cityWindSpeed,generatedWeatherIcon, uvData.value);
+                getWeather(cityObj.cityName, cityObj.cityTemp, cityObj.cityHumidity, cityObj.cityWindSpeed,generatedWeatherIcon, uvData.value);
             }
         }
     })
