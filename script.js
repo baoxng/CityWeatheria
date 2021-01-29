@@ -1,7 +1,7 @@
 // selected element variables
-var apiKey= "d389e89705c7dbbceb75857a1482546f";
+var apiKey= "54a0b4ce720cced36a1e7cf890a65dcf";
 var cityInput= $("#city-input");
-var nameCity= $(".city-name")
+var cityName= $(".city-name")
 var searchBtn= $(".searchBtn");
 var currentDate= $(".current-date");
 var weatherIcon= $(".weather-icon");
@@ -78,7 +78,8 @@ $.ajax({
     let cityObj={
         cityName: weatherData.name,
         cityTemp: weatherData.main.temp,
-        cityHumidity: weatherData.wind.speed,
+        cityHumidity: weatherData.main.humidity,
+        cityWindSpeed: weatherData.wind.speed,
         cityUVIndex: weatherData.coord,
         cityWeatherIconName: weatherData.weather[0].icon
     }
@@ -89,26 +90,26 @@ $.ajax({
 })
 .then(function(uvData){
     if(JSON.parse(localStorage.getItem("save-storage")) == null){
-        let saveStorageArr= [];
-        if (saveStorageArr.indexOf(cityObj.cityName) === -1){
-            saveStorageArr.push(cityObj.cityName);
-            localStorage.setItem("save-storage", JSON.stringify(saveStorageArr));
+        let storageArr= [];
+        if (storageArr.indexOf(cityObj.cityName) === -1){
+            storageArr.push(cityObj.cityName);
+            localStorage.setItem("save-storage", JSON.stringify(storageArr));
             let generatedWeatherIcon = `https:///openweathermap.org/img/w/${cityObj.cityWeatherIconName}.png`;
-            weatherData(cityObj.cityName, cityObj.cityTemp, cityObj.cityHumidity, cityObj.cityWindSpeed, generatedWeatherIcon, uvData.vaule);
-            weatherData(cityObj.cityName);
+            getWeather(cityObj.cityName, cityObj.cityTemp, cityObj.cityHumidity, cityObj.cityWindSpeed, generatedWeatherIcon, uvData.vaule);
+            getsaveStorage(cityObj.cityName);
         }
         else{
             console.log("City already in saveStorage. Unable to add to saved list.")
             let generatedWeatherIcon= `https:///openweathermap.org/img/w/${cityObj.cityWeatherIconName}.png`;
-            weatherData(cityObj.cityName, cityObj.cityTemp, cityObj.cityHumidity, cityObj.cityWindSpeed, generatedWeatherIcon, uvData.value);
+            getWeather(cityObj.cityName, cityObj.cityTemp, cityObj.cityHumidity, cityObj.cityWindSpeed, generatedWeatherIcon, uvData.value);
         }}
         else {
-            let saveStorageArr =JSON.parse(localStorage.getItem("save-storage"));
-            if (saveStorageArr.indexOf(cityObj.cityName) === -1){
-                saveStorageArr.push(cityObj.cityName);
-                localStorage.setItem("save-storage", JSON.stringify(saveStorageArr));
+            let storageArr =JSON.parse(localStorage.getItem("save-storage"));
+            if (storageArr.indexOf(cityObj.cityName) === -1){
+                storageArr.push(cityObj.cityName);
+                localStorage.setItem("save-storage", JSON.stringify(storageArr));
                 let generatedWeatherIcon= `https:///openweathermap.org/img/w/${cityObj.cityWeatherIconName}.png`;
-                weatherData(cityObj.cityName, cityObj.cityTemp, cityObj.cityHumidity, cityObj.cityWindSpeed, generatedWeatherIcon, uvData.value);
+                getWeather(cityObj.cityName, cityObj.cityTemp, cityObj.cityHumidity, cityObj.cityWindSpeed, generatedWeatherIcon, uvData.value);
                 getsaveStorage(cityObj.cityName);
             }
             else{
@@ -132,12 +133,12 @@ function getFiveDayForecast() {
         method: "GET"
     })
     .then(function(fiveDayReponse) {
-        for (let j = 0; j != fiveDayReponse.list.length; j += 8 ) {
+        for (let i = 0; i != fiveDayReponse.list.length; i += 8 ) {
             let cityObj = {
-                date: fiveDayReponse.list[j].dt_txt,
-                icon: fiveDayReponse.list[j].weather[0].icon,
-                temp: fiveDayReponse.list[j].main.temp,
-                humidity: fiveDayReponse.list[j].main.humidity
+                date: fiveDayReponse.list[i].dt_txt,
+                icon: fiveDayReponse.list[i].weather[0].icon,
+                temp: fiveDayReponse.list[i].main.temp,
+                humidity: fiveDayReponse.list[i].main.humidity
             }
             let dateStr = cityObj.date;
             let trimmedDate = dateStr.substring(0, 10); 
